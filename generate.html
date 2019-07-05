@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+h1 {
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 96px;
+  line-height: 350px;
+}
+
+p {
+  text-align: right;
+  font-size: 26px;
+  /* line-height: 350px; */
+}
+</style>
+<h1><span id="result">loading   </span></h1>
+<p><span id="entropy">?</span> bits of entropy</p>
+<script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+<script>
+
+function randomNumberIncludeMinMax(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function range(size, startAt = 0) {
+    return [...Array(size).keys()].map(i => i + startAt);
+}
+
+wordsCount = 4
+
+Promise.all([
+//   "https://raw.githubusercontent.com/tarraschk/richelieu/master/french_passwords_top5000.txt",
+  "https://raw.githubusercontent.com/tarraschk/richelieu/master/french_passwords_top20000.txt"
+].map(function(url) {
+  return fetch(url).then(function(response) {
+    return response.ok ? response.text() : Promise.reject(response.status);
+  }).then(function(text) {
+    return text.split("\n");
+  });
+})).then(function(value) {
+    setSize = value[0].length
+    entropy = wordsCount * Math.log(setSize) / Math.log(2)
+    password = range(wordsCount).map(x => {
+        lineNumber = randomNumberIncludeMinMax(0, setSize - 1);
+        return value[0][lineNumber];
+  }).join(" + ")
+  var one = value[0][0];
+  document.querySelector("#result").textContent = password;
+  document.querySelector("#entropy").textContent = entropy.toFixed(2);
+});
+</script>
